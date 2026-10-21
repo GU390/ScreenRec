@@ -15,7 +15,13 @@ public partial class App : System.Windows.Application
         NativeMethods.TryEnablePerMonitorDpiAwareness();
 
         // 单实例检查（命令行自测 / 诊断模式不受限制）
-        bool isToolMode = e.Args.Length > 0 && (e.Args[0].Equals("--selftest", StringComparison.OrdinalIgnoreCase) || e.Args[0].Equals("--regionprobe", StringComparison.OrdinalIgnoreCase));
+        // 模式识别用「扫描所有参数找第一个 -- 开头的」，不依赖参数顺序
+        string probeMode = e.Args.FirstOrDefault(a => a.StartsWith("--", StringComparison.Ordinal)) ?? string.Empty;
+        string[] toolModes =
+        {
+            "--selftest", "--regionprobe", "--uishot", "--regionshot", "--grabtest", "--pretest"
+        };
+        bool isToolMode = toolModes.Any(m => probeMode.Equals(m, StringComparison.OrdinalIgnoreCase));
         if (!isToolMode)
         {
             bool created;
@@ -52,17 +58,53 @@ public partial class App : System.Windows.Application
         base.OnStartup(e);
 
         var args = e.Args;
-        if (args.Length > 0 && args[0].Equals("--selftest", StringComparison.OrdinalIgnoreCase))
+        Console.WriteLine("[startup] args=[" + string.Join("|", args) + "]");
+
+        // ★ 命令行模式识别：**扫描所有参数**找第一个 "--" 开头的，
+        //   不依赖 args[0] 的位置（不同启动姿势传进来的参数顺序可能不一样）。
+        //   一旦识别成工具模式就绝不创建主窗口 —— 免得在用户桌面上闪一个主界面。
+        string mode = args.FirstOrDefault(a => a.StartsWith("--", StringComparison.Ordinal)) ?? string.Empty;
+
+        if (mode.Equals("--selftest", StringComparison.OrdinalIgnoreCase))
         {
             int code = SelfTest.Run(args);
             Shutdown(code);
+            Environment.Exit(code);
             return;
         }
 
-        if (args.Length > 0 && args[0].Equals("--regionprobe", StringComparison.OrdinalIgnoreCase))
+        if (mode.Equals("--regionprobe", StringComparison.OrdinalIgnoreCase))
         {
             // 诊断模式自己控制退出时机（要等窗口加载完再量）
             RegionProbe.Run(e.Args);
+            return;
+        }
+
+        if (mode.Equals("--pretest", StringComparison.OrdinalIgnoreCase))
+        {
+            // 预览缩略图自检：不显示窗口，只走抓屏链路
+            int code = UiShot.PreviewTest(args);
+            Shutdown(code);
+            Environment.Exit(code);
+            return;
+        }
+
+        if (mode.Equals("--grabtest", StringComparison.OrdinalIgnoreCase))
+        {
+            // 抓屏自检：不弹窗口，只读像素
+            int code = UiShot.GrabTest(args);
+            Shutdown(code);
+            Environment.Exit(code);
+            return;
+        }
+
+        if (mode.Equals("--uishot", StringComparison.OrdinalIgnoreCase) ||
+            mode.Equals("--regionshot", StringComparison.OrdinalIgnoreCase))
+        {
+            // 调试渲染：把界面渲染成 PNG 后退出（只在独立桌面上跑）
+            int code = UiShot.Run(args);
+            Shutdown(code);
+            Environment.Exit(code);
             return;
         }
 
