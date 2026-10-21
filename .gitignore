@@ -1,0 +1,28 @@
+# ---- 构建产物 ----
+bin/
+obj/
+publish/
+out/
+
+# ---- 运行时产物（绝不能进仓库）----
+settings.json
+screenrec_error.log
+screenrec_ui.log
+screenrec_selftest.log
+*.avi
+*.mp4
+~$*
+
+# ---- 编辑器 / 系统 ----
+.vs/
+.idea/
+*.user
+*.suo
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# ---- 隐私 ----
+*.pfx
+*.key
+.env
