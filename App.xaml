@@ -16,17 +16,17 @@
             <Setter Property="Background" Value="{StaticResource CardBrush}" />
             <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Padding" Value="12,8,12,10" />
-            <Setter Property="Margin" Value="0,0,0,10" />
+            <Setter Property="Padding" Value="12,6,12,8" />
+            <Setter Property="Margin" Value="0,0,0,8" />
         </Style>
 
         <Style TargetType="CheckBox">
-            <Setter Property="Margin" Value="0,4,0,4" />
+            <Setter Property="Margin" Value="0,1,0,1" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
 
         <Style TargetType="RadioButton">
-            <Setter Property="Margin" Value="0,4,18,4" />
+            <Setter Property="Margin" Value="0,2,18,2" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
 
@@ -35,7 +35,7 @@
             <Setter Property="Foreground" Value="White" />
             <Setter Property="FontSize" Value="15" />
             <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Height" Value="42" />
+            <Setter Property="Height" Value="40" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Template">
