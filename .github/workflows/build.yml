@@ -84,6 +84,11 @@ jobs:
             sha256.txt
           if-no-files-found: error
 
+      - name: 生成 Release 说明
+        if: startsWith(github.ref, 'refs/tags/v') || inputs.publish_release != ''
+        shell: pwsh
+        run: pwsh -File scripts/make-release-notes.ps1
+
       - name: 创建 Release
         if: startsWith(github.ref, 'refs/tags/v') || inputs.publish_release != ''
         uses: softprops/action-gh-release@v2
@@ -94,15 +99,4 @@ jobs:
           draft: false
           prerelease: false
           files: out/ScreenRec.exe
-          body: |
-            ### ScreenRec 屏幕录像
-
-            Windows 整屏 / 矩形区域录像，输出 MP4 (H.264) 或 AVI (MJPEG)。
-
-            **下载 `ScreenRec.exe`**，双击即用，不需要装 .NET，不需要装解码器。
-
-            * MP4 模式需要 `ffmpeg.exe`：把它放在 `ScreenRec.exe` 同一个文件夹里即可；
-              找不到时程序会提示并自动回落到 AVI。
-            * 快捷键 `F9` 开始/停止、`F10` 框选、`Esc` 停止；中文输入法下也有效。
-
-            SHA256 见下（构建时生成）。
+          body_path: release-notes.md
