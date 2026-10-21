@@ -17,7 +17,18 @@
     <AssemblyTitle>屏幕录像 ScreenRec</AssemblyTitle>
     <Product>ScreenRec</Product>
     <Description>简易屏幕录像工具：整屏 / 矩形区域，输出 MJPEG AVI</Description>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
   </PropertyGroup>
+
+  <!--
+    ★ 关掉 System.Drawing / System.Windows.Forms 的隐式全局 using。
+      这两个命名空间和 WPF 的 Color / Brushes / Point / Button / FlowDirection 全都重名，
+      开了就到处是 CS0104「二义性引用」。
+      真正要用到的地方（Screen / FolderBrowserDialog）本来就是全限定名写的。
+  -->
+  <ItemGroup>
+    <Using Remove="System.Drawing" />
+    <Using Remove="System.Windows.Forms" />
+  </ItemGroup>
 
 </Project>
