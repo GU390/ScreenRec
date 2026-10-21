@@ -64,11 +64,24 @@ jobs:
           Write-Host "自测产物: $len 字节"
           if ($len -lt 4096) { throw "自测产物太小，抓屏/编码链路可能有问题" }
 
+      - name: 生成 SHA256
+        shell: pwsh
+        run: |
+          $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath 'out\ScreenRec.exe').Hash.ToLower()
+          $size = [math]::Round((Get-Item 'out\ScreenRec.exe').Length / 1MB, 2)
+          Write-Host "===== SHA256 ====="
+          Write-Host $hash
+          Write-Host "===== SIZE ====="
+          Write-Host "$size MB"
+          Set-Content -LiteralPath 'sha256.txt' -Value ("ScreenRec.exe  SHA256  " + $hash + "  (" + $size + " MB)") -Encoding utf8
+
       - name: 上传构建产物
         uses: actions/upload-artifact@v4
         with:
           name: ScreenRec-windows-x64
-          path: out/ScreenRec.exe
+          path: |
+            out/ScreenRec.exe
+            sha256.txt
           if-no-files-found: error
 
       - name: 创建 Release
