@@ -12,11 +12,11 @@
         Cursor="Cross"
         FontFamily="Microsoft YaHei UI">
     <Window.Resources>
-        <!-- 遮罩层上的按钮：深色底，鼠标一点就生效（输入法挡不住鼠标） -->
-        <Style x:Key="MaskButton" TargetType="Button">
-            <Setter Property="Background" Value="#E62A323E" />
+        <!-- 工具条上的按钮：深色底，鼠标一点就生效（输入法挡不住鼠标） -->
+        <Style x:Key="ToolButton" TargetType="Button">
+            <Setter Property="Background" Value="#30FFFFFF" />
             <Setter Property="Foreground" Value="White" />
-            <Setter Property="Padding" Value="12,5" />
+            <Setter Property="Padding" Value="12,6" />
             <Setter Property="Margin" Value="6,0,0,0" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="FontSize" Value="12" />
@@ -31,41 +31,65 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- 强调按钮：确认 -->
+        <Style x:Key="ToolPrimaryButton" TargetType="Button" BasedOn="{StaticResource ToolButton}">
+            <Setter Property="Background" Value="#2F6BEA" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
     </Window.Resources>
 
     <Canvas x:Name="Root">
-        <!-- 四块遮罩（把选区以外压暗） -->
+        <!-- 四块遮罩（把选区以外压暗，选区内部保持完全透明 → 能看清将要录到的真实画面） -->
         <Rectangle x:Name="MaskTop" Fill="#B3000000" />
         <Rectangle x:Name="MaskBottom" Fill="#B3000000" />
         <Rectangle x:Name="MaskLeft" Fill="#B3000000" />
         <Rectangle x:Name="MaskRight" Fill="#B3000000" />
 
-        <!-- 选框 -->
-        <Rectangle x:Name="SelBorder" Stroke="#FF2F6BEA" StrokeThickness="2" Fill="#1A2F6BEA" Visibility="Collapsed" />
-        <Rectangle x:Name="HandleNW" Width="10" Height="10" Fill="White" Stroke="#FF2F6BEA" StrokeThickness="2" Visibility="Collapsed" />
-        <Rectangle x:Name="HandleNE" Width="10" Height="10" Fill="White" Stroke="#FF2F6BEA" StrokeThickness="2" Visibility="Collapsed" />
-        <Rectangle x:Name="HandleSW" Width="10" Height="10" Fill="White" Stroke="#FF2F6BEA" StrokeThickness="2" Visibility="Collapsed" />
-        <Rectangle x:Name="HandleSE" Width="10" Height="10" Fill="White" Stroke="#FF2F6BEA" StrokeThickness="2" Visibility="Collapsed" />
+        <!-- 选框：内部完全透明（QQ 同款），用户能看清将要录到的真实画面 -->
+        <Rectangle x:Name="SelBorder" Stroke="#FF2F6BEA" StrokeThickness="2" Fill="Transparent" Visibility="Collapsed" />
 
-        <!-- 尺寸标签 -->
-        <Border x:Name="SizeBox" Background="#DD101418" CornerRadius="4" Padding="7,3" Visibility="Collapsed">
-            <TextBlock x:Name="SizeText" Foreground="White" FontSize="12" FontWeight="SemiBold" />
+        <!-- 8 个控制点：4 角 + 4 边中点（QQ 截图同款） -->
+        <Rectangle x:Name="HandleNW" Width="10" Height="10" Fill="White" Stroke="#FF2F6BEA" StrokeThickness="2" Visibility="Collapsed" />
+        <Rectangle x:Name="HandleN"  Width="8"  Height="8"  Fill="White" Stroke="#FF2F6BEA" StrokeThickness="2" Visibility="Collapsed" />
+        <Rectangle x:Name="HandleNE" Width="10" Height="10" Fill="White" Stroke="#FF2F6BEA" StrokeThickness="2" Visibility="Collapsed" />
+        <Rectangle x:Name="HandleE"  Width="8"  Height="8"  Fill="White" Stroke="#FF2F6BEA" StrokeThickness="2" Visibility="Collapsed" />
+        <Rectangle x:Name="HandleSE" Width="10" Height="10" Fill="White" Stroke="#FF2F6BEA" StrokeThickness="2" Visibility="Collapsed" />
+        <Rectangle x:Name="HandleS"  Width="8"  Height="8"  Fill="White" Stroke="#FF2F6BEA" StrokeThickness="2" Visibility="Collapsed" />
+        <Rectangle x:Name="HandleSW" Width="10" Height="10" Fill="White" Stroke="#FF2F6BEA" StrokeThickness="2" Visibility="Collapsed" />
+        <Rectangle x:Name="HandleW"  Width="8"  Height="8"  Fill="White" Stroke="#FF2F6BEA" StrokeThickness="2" Visibility="Collapsed" />
+
+        <!-- 跟随选框的浮动工具条：预览缩略图 + 尺寸 + 确认/重选/取消 -->
+        <Border x:Name="Toolbar" Visibility="Collapsed" Background="#F01C2028" CornerRadius="10" Padding="10,8">
+            <StackPanel Orientation="Horizontal">
+                <!-- 预览缩略图：实时显示将要录到的画面 -->
+                <Border x:Name="PreviewFrame" Width="132" Height="78" Background="#2A2F38" CornerRadius="4"
+                        ClipToBounds="True">
+                    <Image x:Name="PreviewImage" Stretch="Uniform" Width="132" Height="78" />
+                </Border>
+
+                <StackPanel Margin="12,0,14,0" VerticalAlignment="Center" Width="205">
+                    <TextBlock x:Name="ToolSizeText" Foreground="White" FontSize="13" FontWeight="SemiBold"
+                               TextTrimming="CharacterEllipsis" />
+                    <TextBlock x:Name="ToolHintText" Foreground="#96A0AE" FontSize="11" Margin="0,5,0,0"
+                               Text="拖动框内移动，拖动方块缩放" TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="BtnConfirm" Content="确认" Style="{StaticResource ToolPrimaryButton}" Click="OnConfirmClick" />
+                    <Button x:Name="BtnReset" Content="重选" Style="{StaticResource ToolButton}" Click="OnResetClick" />
+                    <Button x:Name="BtnCancel" Content="取消" Style="{StaticResource ToolButton}" Click="OnCancelClick" />
+                </StackPanel>
+            </StackPanel>
         </Border>
 
-        <!-- 顶部提示 + 鼠标可点的按钮（Esc/R 在中文输入法下会被 IME 吞掉，按钮是兜底） -->
-        <StackPanel Orientation="Horizontal" Margin="16,16,0,0">
-            <Border Background="#DD101418" CornerRadius="6" Padding="12,8">
-                <StackPanel>
-                    <TextBlock Text="拖动鼠标框选要录制的区域" Foreground="White" FontSize="14" FontWeight="SemiBold" />
-                    <TextBlock Text="回车 = 确认　Esc = 取消　R = 重新框选　选区内可拖动移动，边角可缩放"
-                               Foreground="#9AA6B2" FontSize="11" Margin="0,3,0,0" />
-                </StackPanel>
-            </Border>
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <Button x:Name="BtnConfirm" Content="确认" Style="{StaticResource MaskButton}" Click="OnConfirmClick" />
-                <Button x:Name="BtnReset" Content="重新框选" Style="{StaticResource MaskButton}" Click="OnResetClick" />
-                <Button x:Name="BtnCancel" Content="取消" Style="{StaticResource MaskButton}" Click="OnCancelClick" />
+        <!-- 左上角提示：全部是鼠标操作，不依赖快捷键 -->
+        <Border x:Name="HintPanel" Background="#D91C2028" CornerRadius="8" Padding="14,10" Margin="16,16,0,0">
+            <StackPanel>
+                <TextBlock Text="按住鼠标左键拖动，框选要录制的区域" Foreground="White" FontSize="14" FontWeight="SemiBold" />
+                <TextBlock Text="框好后拖动方块可缩放、拖动框内可移动；右侧工具条上有预览图和确认按钮"
+                           Foreground="#96A0AE" FontSize="11" Margin="0,5,0,0" TextWrapping="Wrap" MaxWidth="360" />
             </StackPanel>
-        </StackPanel>
+        </Border>
     </Canvas>
 </Window>
