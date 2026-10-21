@@ -39,7 +39,19 @@ public partial class CountdownWindow : Window
             // 精确铺满虚拟屏幕（物理像素，跨显示器也要盖住）
             var hwnd = new WindowInteropHelper(this).Handle;
             NativeMethods.SetWindowPosExact(hwnd, virtualScreen);
+            // 把焦点抢过来，Esc 才收得到（按钮仍然是主要的取消方式）
+            try { Activate(); Focus(); } catch { /* ignore */ }
             _timer.Start();
+        };
+
+        // Esc 是加速路径，主路径是界面上的「取消」按钮
+        KeyDown += (_, e) =>
+        {
+            if (e.Key == System.Windows.Input.Key.Escape)
+            {
+                Finish(true);
+                e.Handled = true;
+            }
         };
     }
 
