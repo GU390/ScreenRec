@@ -98,10 +98,18 @@ internal static class FfmpegLocator
         return null;
     }
 
-    /// <summary>把画质档位(40~95)映射到 x264 的 CRF(30~18)。</summary>
+    /// <summary>
+    /// 把画质档位(40~100)映射到 x264 的 CRF。
+    /// 40→30、80→21、95→18 是常规区间；95 以上进一步压到 12（近乎无损），代价是文件明显变大。
+    /// </summary>
     public static int QualityToCrf(int quality)
     {
-        double q = Math.Clamp(quality, 40, 95);
+        double q = Math.Clamp(quality, 40, 100);
+        if (q >= 95)
+        {
+            // 近乎无损段：95→18，100→12
+            return (int)Math.Round(18.0 - (q - 95.0) * 1.2);
+        }
         return (int)Math.Round(30.0 - (q - 40.0) * (12.0 / 55.0));
     }
 }
