@@ -21,9 +21,11 @@ internal static class ScreenHelper
             var b = s.Bounds;
             double scale = NativeMethods.GetScaleAt(b.Left + b.Width / 2, b.Top + b.Height / 2);
             string name = s.DeviceName;
+            // 显示用短名（去掉 "\\.\" 前缀），否则下拉框里挤不下
+            string shortName = name.StartsWith(@"\\.\", StringComparison.Ordinal) ? name.Substring(4) : name;
             string label = s.Primary
-                ? $"{name}（主显示器） {b.Width}×{b.Height}"
-                : $"{name} {b.Width}×{b.Height}";
+                ? $"{shortName}（主显示器） {b.Width}×{b.Height}"
+                : $"{shortName} {b.Width}×{b.Height}";
             list.Add(new ScreenInfo(name, label, b, s.Primary, scale));
         }
         if (list.Count == 0)
@@ -45,6 +47,9 @@ internal sealed class AppSettings
 {
     public int Fps { get; set; } = 15;
     public int Quality { get; set; } = 80;
+
+    /// <summary>开始录像前的倒计时秒数（0 = 立即开始）。</summary>
+    public int CountdownSeconds { get; set; }
     public string OutputDir { get; set; } = DefaultOutputDir();
 
     /// <summary>输出格式：avi / mp4 / both</summary>
