@@ -1,0 +1,71 @@
+<Window x:Class="ScreenRec.RegionSelectWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="框选录制区域"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        Topmost="True"
+        ResizeMode="NoResize"
+        WindowStartupLocation="Manual"
+        Cursor="Cross"
+        FontFamily="Microsoft YaHei UI">
+    <Window.Resources>
+        <!-- 遮罩层上的按钮：深色底，鼠标一点就生效（输入法挡不住鼠标） -->
+        <Style x:Key="MaskButton" TargetType="Button">
+            <Setter Property="Background" Value="#E62A323E" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Padding" Value="12,5" />
+            <Setter Property="Margin" Value="6,0,0,0" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Canvas x:Name="Root">
+        <!-- 四块遮罩（把选区以外压暗） -->
+        <Rectangle x:Name="MaskTop" Fill="#B3000000" />
+        <Rectangle x:Name="MaskBottom" Fill="#B3000000" />
+        <Rectangle x:Name="MaskLeft" Fill="#B3000000" />
+        <Rectangle x:Name="MaskRight" Fill="#B3000000" />
+
+        <!-- 选框 -->
+        <Rectangle x:Name="SelBorder" Stroke="#FF2F6BEA" StrokeThickness="2" Fill="#1A2F6BEA" Visibility="Collapsed" />
+        <Rectangle x:Name="HandleNW" Width="10" Height="10" Fill="White" Stroke="#FF2F6BEA" StrokeThickness="2" Visibility="Collapsed" />
+        <Rectangle x:Name="HandleNE" Width="10" Height="10" Fill="White" Stroke="#FF2F6BEA" StrokeThickness="2" Visibility="Collapsed" />
+        <Rectangle x:Name="HandleSW" Width="10" Height="10" Fill="White" Stroke="#FF2F6BEA" StrokeThickness="2" Visibility="Collapsed" />
+        <Rectangle x:Name="HandleSE" Width="10" Height="10" Fill="White" Stroke="#FF2F6BEA" StrokeThickness="2" Visibility="Collapsed" />
+
+        <!-- 尺寸标签 -->
+        <Border x:Name="SizeBox" Background="#DD101418" CornerRadius="4" Padding="7,3" Visibility="Collapsed">
+            <TextBlock x:Name="SizeText" Foreground="White" FontSize="12" FontWeight="SemiBold" />
+        </Border>
+
+        <!-- 顶部提示 + 鼠标可点的按钮（Esc/R 在中文输入法下会被 IME 吞掉，按钮是兜底） -->
+        <StackPanel Orientation="Horizontal" Margin="16,16,0,0">
+            <Border Background="#DD101418" CornerRadius="6" Padding="12,8">
+                <StackPanel>
+                    <TextBlock Text="拖动鼠标框选要录制的区域" Foreground="White" FontSize="14" FontWeight="SemiBold" />
+                    <TextBlock Text="回车 = 确认　Esc = 取消　R = 重新框选　选区内可拖动移动，边角可缩放"
+                               Foreground="#9AA6B2" FontSize="11" Margin="0,3,0,0" />
+                </StackPanel>
+            </Border>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Button x:Name="BtnConfirm" Content="确认" Style="{StaticResource MaskButton}" Click="OnConfirmClick" />
+                <Button x:Name="BtnReset" Content="重新框选" Style="{StaticResource MaskButton}" Click="OnResetClick" />
+                <Button x:Name="BtnCancel" Content="取消" Style="{StaticResource MaskButton}" Click="OnCancelClick" />
+            </StackPanel>
+        </StackPanel>
+    </Canvas>
+</Window>
