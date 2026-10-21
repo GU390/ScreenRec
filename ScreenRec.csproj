@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>ScreenRec</AssemblyName>
+    <RootNamespace>ScreenRec</RootNamespace>
+    <CodePage>65001</CodePage>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <DebugType>embedded</DebugType>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <AssemblyTitle>屏幕录像 ScreenRec</AssemblyTitle>
+    <Product>ScreenRec</Product>
+    <Description>简易屏幕录像工具：整屏 / 矩形区域，输出 MJPEG AVI</Description>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+
+</Project>
