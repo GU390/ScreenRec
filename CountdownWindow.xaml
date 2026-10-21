@@ -1,0 +1,36 @@
+<Window x:Class="ScreenRec.CountdownWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="准备录制"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        Topmost="True"
+        ResizeMode="NoResize"
+        WindowStartupLocation="Manual"
+        FontFamily="Microsoft YaHei UI">
+    <Grid>
+        <!-- 半透明压暗，让数字最醒目 -->
+        <Border Background="#B3000000">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock x:Name="CountText" Text="3" Foreground="White" FontSize="110"
+                           FontWeight="Bold" HorizontalAlignment="Center" />
+                <TextBlock x:Name="HintText" Text="即将开始录制" Foreground="#C8D0DA"
+                           FontSize="15" HorizontalAlignment="Center" Margin="0,14,0,0" />
+                <Button x:Name="CancelButton" Content="取消" Width="120" Height="36"
+                        HorizontalAlignment="Center" Margin="0,18,0,0"
+                        Background="#30FFFFFF" Foreground="White" BorderThickness="0"
+                        FontSize="14" Cursor="Hand" Click="OnCancelClick">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="6">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
