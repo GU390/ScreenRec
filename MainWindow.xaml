@@ -1,22 +1,26 @@
 <Window x:Class="ScreenRec.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="屏幕录像 ScreenRec" Width="470" SizeToContent="Height"
+        xmlns:local="clr-namespace:ScreenRec"
+        Title="屏幕录像 ScreenRec" Width="560" SizeToContent="Height"
         WindowStartupLocation="CenterScreen" Background="#EEF1F6"
         FontFamily="Microsoft YaHei UI" FontSize="13" ResizeMode="NoResize">
-    <Grid Margin="16,14,16,16">
+    <!-- 内容比屏幕工作区高时允许滚动（小屏幕也不会把控件挤没） -->
+    <ScrollViewer x:Name="ScrollHost" VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+    <Grid Margin="16,12,16,14">
         <StackPanel>
             <!-- 标题 -->
-            <Grid Margin="2,0,0,12">
+            <Grid Margin="2,0,0,8">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Border Width="34" Height="34" CornerRadius="7" Background="#2F6BEA">
-                    <Ellipse Width="13" Height="13" Fill="White" />
+                <Border Width="28" Height="28" CornerRadius="6" Background="#2F6BEA">
+                    <Ellipse Width="11" Height="11" Fill="White" />
                 </Border>
-                <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
-                    <TextBlock Text="屏幕录像" FontSize="17" FontWeight="SemiBold" />
+                <StackPanel Grid.Column="1" Margin="9,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="屏幕录像" FontSize="16" FontWeight="SemiBold" />
                     <TextBlock Text="整屏或矩形区域录制 · 输出 MP4(H.264) / AVI 文件" FontSize="11" Foreground="#6B7280" />
                 </StackPanel>
             </Grid>
@@ -24,29 +28,34 @@
             <!-- 录制设置 -->
             <GroupBox Header="录制设置">
                 <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,2,0,8">
-                        <RadioButton x:Name="RadioFull" Content="整屏录制" GroupName="Mode" IsChecked="True" Checked="OnModeChanged" />
-                        <RadioButton x:Name="RadioRegion" Content="矩形区域" GroupName="Mode" Checked="OnModeChanged" />
-                    </StackPanel>
-                    <Grid>
+                    <!-- 模式 + 显示器 同一行，省一行高度 -->
+                    <Grid Margin="0,2,0,6">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="72" />
+                            <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="显示器" VerticalAlignment="Center" Foreground="#6B7280" />
-                        <ComboBox x:Name="ScreenCombo" Grid.Column="1" Height="26" SelectionChanged="OnScreenChanged" />
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <RadioButton x:Name="RadioFull" Content="整屏录制" GroupName="Mode" IsChecked="True" Checked="OnModeChanged" />
+                            <RadioButton x:Name="RadioRegion" Content="矩形区域" GroupName="Mode" Checked="OnModeChanged" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="显示器" VerticalAlignment="Center" Foreground="#6B7280" Margin="0,0,6,0" />
+                            <ComboBox x:Name="ScreenCombo" Width="240" Height="26" SelectionChanged="OnScreenChanged" />
+                        </StackPanel>
                     </Grid>
-                    <Grid x:Name="RegionPanel" Margin="0,10,0,0" Visibility="Collapsed">
+                    <Grid x:Name="RegionPanel" Margin="0,6,0,0" Visibility="Collapsed">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="72" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="区域" VerticalAlignment="Center" Foreground="#6B7280" />
-                        <TextBlock x:Name="RegionText" Grid.Column="1" Text="尚未框选" VerticalAlignment="Center" />
+                        <TextBlock x:Name="RegionText" Grid.Column="1" Text="尚未框选" VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis" />
                         <Button Grid.Column="2" Content="框选区域…" Style="{StaticResource GhostButton}" Click="OnPickRegion" Padding="10,4" />
                     </Grid>
-                    <Grid Margin="0,10,0,0">
+                    <Grid Margin="0,6,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="72" />
                             <ColumnDefinition Width="*" />
@@ -54,8 +63,29 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="自检" VerticalAlignment="Center" Foreground="#6B7280" />
                         <TextBlock x:Name="ProbeText" Grid.Column="1" VerticalAlignment="Center" FontSize="11" Foreground="#6B7280"
-                                   Text="框选坐标与缩放自检（怀疑选区偏移时点它）" />
+                                   Text="框选坐标与缩放自检（怀疑选区偏移时点它）"
+                                   TextTrimming="CharacterEllipsis" />
                         <Button Grid.Column="2" Content="坐标自检…" Style="{StaticResource GhostButton}" Click="OnProbe" Margin="6,0,0,0" Padding="10,4" />
+                    </Grid>
+
+                    <!-- 倒计时 -->
+                    <Grid Margin="0,6,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="72" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="开始" VerticalAlignment="Center" Foreground="#6B7280" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <RadioButton x:Name="RadioImmediate" Content="立即录" GroupName="Cd" IsChecked="True" Checked="OnCountdownChanged" />
+                            <RadioButton x:Name="RadioCountdown" Content="倒计时" GroupName="Cd" Checked="OnCountdownChanged" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="6,0,0,0" VerticalAlignment="Center">
+                            <TextBox x:Name="CountdownSecBox" Width="54" Height="24" Padding="6,2"
+                                     VerticalContentAlignment="Center" Text="3" TextChanged="OnCountdownChanged"
+                                     ToolTip="倒计时秒数（1~3600）" />
+                            <TextBlock Text="秒后开始" Margin="8,0,0,0" VerticalAlignment="Center" Foreground="#6B7280" />
+                        </StackPanel>
                     </Grid>
                 </StackPanel>
             </GroupBox>
@@ -73,15 +103,15 @@
                         <TextBox x:Name="OutputDirBox" Grid.Column="1" Height="26" Padding="6,2" VerticalContentAlignment="Center" />
                         <Button Grid.Column="2" Content="浏览…" Style="{StaticResource GhostButton}" Click="OnBrowse" Margin="6,0,0,0" Padding="10,4" />
                     </Grid>
-                    <TextBlock x:Name="FileNameText" Margin="72,6,0,0" FontSize="11" Foreground="#6B7280" TextTrimming="CharacterEllipsis" />
+                    <TextBlock x:Name="FileNameText" Margin="72,5,0,0" FontSize="11" Foreground="#6B7280" TextTrimming="CharacterEllipsis" />
 
-                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                        <RadioButton x:Name="RadioAvi" Content="AVI (MJPEG) · 零依赖" GroupName="Fmt" IsChecked="True" Checked="OnFormatChanged" />
-                        <RadioButton x:Name="RadioMp4" Content="MP4 (H.264) · 体积小" GroupName="Fmt" Checked="OnFormatChanged" />
+                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                        <RadioButton x:Name="RadioAvi" Content="AVI 零依赖" GroupName="Fmt" IsChecked="True" Checked="OnFormatChanged" />
+                        <RadioButton x:Name="RadioMp4" Content="MP4 体积小" GroupName="Fmt" Checked="OnFormatChanged" />
                         <RadioButton x:Name="RadioBoth" Content="两者都要" GroupName="Fmt" Checked="OnFormatChanged" />
                     </StackPanel>
 
-                    <Grid Margin="0,8,0,0">
+                    <Grid Margin="0,6,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="72" />
                             <ColumnDefinition Width="*" />
@@ -98,43 +128,65 @@
             <!-- 参数 -->
             <GroupBox Header="参数">
                 <StackPanel>
-                    <Grid Margin="0,0,0,6">
+                    <Grid Margin="0,0,0,4">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="72" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="78" />
+                            <ColumnDefinition Width="86" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="帧率" VerticalAlignment="Center" Foreground="#6B7280" />
-                        <Slider x:Name="FpsSlider" Grid.Column="1" Minimum="5" Maximum="30" Value="15" ValueChanged="OnParamChanged" />
+                        <Slider x:Name="FpsSlider" Grid.Column="1" Minimum="5" Maximum="60" Value="15"
+                                TickFrequency="5" TickPlacement="BottomRight" IsSnapToTickEnabled="True"
+                                ValueChanged="OnParamChanged" />
                         <TextBlock x:Name="FpsText" Grid.Column="2" Text="15 fps" HorizontalAlignment="Right" VerticalAlignment="Center" />
                     </Grid>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="72" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="78" />
+                            <ColumnDefinition Width="86" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="画质" VerticalAlignment="Center" Foreground="#6B7280" />
-                        <Slider x:Name="QualitySlider" Grid.Column="1" Minimum="40" Maximum="95" Value="80" ValueChanged="OnParamChanged" />
+                        <Slider x:Name="QualitySlider" Grid.Column="1" Minimum="40" Maximum="100" Value="80"
+                                TickFrequency="10" TickPlacement="BottomRight" IsSnapToTickEnabled="True"
+                                ValueChanged="OnParamChanged" />
                         <TextBlock x:Name="QualityText" Grid.Column="2" Text="80" HorizontalAlignment="Right" VerticalAlignment="Center" />
                     </Grid>
                 </StackPanel>
             </GroupBox>
 
+            <!-- 资源占用预估 -->
+            <GroupBox Header="资源占用预估">
+                <StackPanel>
+                    <local:UsageBars x:Name="UsageBars" HorizontalAlignment="Left" />
+                    <TextBlock x:Name="UsageNote" Margin="0,4,0,0" FontSize="11" Foreground="#6B7280"
+                               TextWrapping="Wrap"
+                               Text="按当前分辨率 / 帧率 / 画质粗算，实际占用随画面变化而变" />
+                </StackPanel>
+            </GroupBox>
+
             <!-- 选项 -->
             <GroupBox Header="选项">
-                <StackPanel>
-                    <CheckBox x:Name="CheckHideMain" Content="录制时隐藏本窗口（用悬浮条或 F9 停止）" />
-                    <CheckBox x:Name="CheckHud" Content="显示悬浮提示条（时长 / 帧数 / 大小 / 预览）" />
-                    <CheckBox x:Name="CheckPreview" Content="悬浮条内显示实时预览画面" />
-                    <CheckBox x:Name="CheckOpenFolder" Content="录制结束后打开输出文件夹" />
-                </StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <CheckBox x:Name="CheckHideMain" Content="录制时隐藏主窗口（F9 停止）" Grid.Row="0" Grid.Column="0" />
+                    <CheckBox x:Name="CheckHud" Content="显示悬浮提示条" Grid.Row="0" Grid.Column="1" />
+                    <CheckBox x:Name="CheckPreview" Content="悬浮条内显示实时预览" Grid.Row="1" Grid.Column="0" />
+                    <CheckBox x:Name="CheckOpenFolder" Content="录制后打开输出文件夹" Grid.Row="1" Grid.Column="1" />
+                </Grid>
             </GroupBox>
 
             <!-- 底部 -->
             <TextBlock x:Name="HotkeyWarn" Foreground="#C0622B" FontSize="11" TextWrapping="Wrap"
-                       Margin="2,0,0,6" Visibility="Collapsed" />
-            <Grid Margin="2,2,0,0">
+                       Margin="2,0,0,4" Visibility="Collapsed" />
+            <Grid Margin="2,0,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
@@ -144,4 +196,5 @@
             </Grid>
         </StackPanel>
     </Grid>
+    </ScrollViewer>
 </Window>
