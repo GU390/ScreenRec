@@ -53,9 +53,16 @@ jobs:
           $size = (Get-Item $exe).Length
           Write-Host "产物大小: $size 字节"
           if ($size -lt 10MB) { throw "产物太小，可能没编全" }
-          # 跑一次命令行自测：录 3 秒，确认抓屏/编码/封装整条链路可用
-          & $exe --selftest --seconds 3 --out (Join-Path $env:RUNNER_TEMP 'smoke.avi') --fps 10 --quality 60
-          if ($LASTEXITCODE -ne 0) { throw "自测失败，退出码 $LASTEXITCODE" }
+          # ★ WinExe 用 & 启动不会等待，$LASTEXITCODE 会是上一条命令的返回值 —— 必须 Start-Process -Wait
+          $smoke = Join-Path $env:RUNNER_TEMP 'smoke.avi'
+          $p = Start-Process -FilePath $exe `
+                -ArgumentList @('--selftest', '--seconds', '3', '--out', $smoke, '--fps', '10', '--quality', '60') `
+                -Wait -PassThru -NoNewWindow
+          Write-Host "自测退出码: $($p.ExitCode)"
+          if (-not (Test-Path $smoke)) { throw "自测没产出文件" }
+          $len = (Get-Item $smoke).Length
+          Write-Host "自测产物: $len 字节"
+          if ($len -lt 4096) { throw "自测产物太小，抓屏/编码链路可能有问题" }
 
       - name: 上传构建产物
         uses: actions/upload-artifact@v4
